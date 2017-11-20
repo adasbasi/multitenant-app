@@ -2,9 +2,8 @@
 
 ## Faydalanılan Kaynaklar/Çalışmalar
 
-* [Basic Subdomains in Ruby on Rails](https://richonrails.com/articles/basic-subdomains-in-ruby-on-rails)!
-
-* [Apartment](https://github.com/influitive/apartment)!
+* [Basic Subdomains in Ruby on Rails](https://richonrails.com/articles/basic-subdomains-in-ruby-on-rails)
+* [Apartment](https://github.com/influitive/apartment)
 
 
 ## Subdomain
@@ -156,6 +155,86 @@ Post.create(title:"Gönderi iki", body:"Deneme iletisi iki", blog_id: 1)
 ```
 
 Şimdi uygulamamızı test etme zamanı. Development ortamında test yapmanın en kolay yolu `vcap.me` alan adını kullanmaktır. 
-`vcamp.me` ve buna bağlı tüm alt alanlar localhost'a işaret eder. Rails sunucusu çalıştırın ve [](http://www.vcap.me:3000) adresine gidin. 
+`vcamp.me` ve buna bağlı tüm alt alanlar localhost'a işaret eder. Rails sunucusu çalıştırın ve [http://www.vcap.me:3000](http://www.vcap.me:3000)! adresine gidin. 
 Bir blog listesi göreceksiniz. Bu bloglardan birine tıklamak, belirli blog'u kendi yazılarıyla birlikte gösterecektir. 
 Daha sonra, yazıyı görüntülemek için iletiye tıklayabilirsiniz.
+
+
+## Multitenant - Apartment Gem
+
+Gemfile dosyanıza aşağıdaki satırı ekleyin ve `$ bundle install` komutunu çalıştırın.
+
+```ruby
+gem 'apartment'
+```
+
+Sonra `apartment` kütüphanelerini sistemimize aşağıdaki komutu çalıştırarak yüklüyoruz.
+
+```bash
+$ bundle exec rails generate apartment:install
+``` 
+
+Bu komut ile birlikte `config/initializers/apartment.rb` ilklendirme dosyası oluşacaktır.
+Bu dosyada bulunan
+
+```ruby
+# config.excluded_models = %w{ Tenant }  satırını
+
+config.excluded_models = %w{ Blog } 
+```
+
+olarak düzenliyoruz.
+
+```ruby
+
+# config.tenant_names = lambda { ToDo_Tenant_Or_User_Model.pluck :database } satırınıda
+
+config.tenant_names = lambda { Blog.pluck :subdomain }
+```
+
+olarak düzenliyoruz.
+
+**Önemli nokta** apartment geminin Rails 5.0 'da çalışabilmesi için bu dosyanın alt taraflarında bulunan 
+
+```ruby
+Rails.application.config.middleware.use "Apartment::Elevators::Subdomain"
+```
+
+satırında bulunan **çift tırnak/kesme işaretlerini** kaldırıyoruz. Bu işaretleri kaldırmaz isek uygulama hata verecektir.
+Son olarak `config/application.rb`dosyamızı aşağıdaki gibi düzenliyoruz.
+
+```ruby
+require_relative 'boot'
+
+require 'rails/all'
+
+require 'apartment/elevators/subdomain'
+# Require the gems listed in Gemfile, including any gems
+# you've limited to :test, :development, or :production.
+Bundler.require(*Rails.groups)
+
+module MultitenantApp
+  class Application < Rails::Application
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 5.1
+    Rails.application.config.middleware.use Apartment::Elevators::Subdomain
+    Apartment::Elevators::Subdomain.excluded_subdomains = ['www']
+    
+  end
+end
+```
+
+Bu düzenlemeyi yapıp sunucumuzu çalıştırdıktan sonra multi tenant yapısının çalıştığını göreceksiniz. Son olarak
+multitenant yapısının yeni bir model üzerinde çalıştığını görmek için aşağıdaki komutları çalıştırın.
+
+```bash
+$ rails generate scaffold Project title
+
+$ rake db:migrate
+```
+
+Bu iki komutu çalıştırdıktan sonra aşağıki gibi bir çıktı alacaksınız.
+
+![](img.png)
+
+Burada multi tenant yapımızız her oluşturulan blog'a eklenen projeler için oluştuğunu göreceksiniz.
