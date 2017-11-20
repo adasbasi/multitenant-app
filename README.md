@@ -5,7 +5,7 @@
 * [Basic Subdomains in Ruby on Rails](https://richonrails.com/articles/basic-subdomains-in-ruby-on-rails)
 * [Apartment](https://github.com/influitive/apartment)
 
-## Subdomain
+## Subdomain
 
 Aşağıda yazılı komutlar ile modellerimizi oluşturuyoruz.
 
@@ -158,7 +158,7 @@ Post.create(title:"Gönderi iki", body:"Deneme iletisi iki", blog_id: 1)
 Bir blog listesi göreceksiniz. Bu bloglardan birine tıklamak, belirli blog'u kendi yazılarıyla birlikte gösterecektir. 
 Daha sonra, yazıyı görüntülemek için iletiye tıklayabilirsiniz.
 
-## Multitenant - Apartment Gem
+## Multitenant - Apartment Gem
 
 Gemfile dosyanıza aşağıdaki satırı ekleyin ve `$ bundle install` komutunu çalıştırın.
 
