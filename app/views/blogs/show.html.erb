@@ -1,0 +1,8 @@
+<h1><%= @blog.name %></h1>
+<hr />
+<% @posts.each do |post| %>
+
+<h3><%= post.title %></h3>
+<p><%= truncate post.body, length: 160 %></p>
+<%= link_to "Read More", post %>
+<% end %>

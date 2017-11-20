@@ -1,0 +1,7 @@
+<h1>Blogs on this Server</h1>
+
+<ul>
+  <% @blogs.each do |blog| %>
+    <li><%= link_to blog.name, root_url(subdomain: blog.subdomain) %></li>
+  <% end %>
+</ul>
